@@ -46,7 +46,7 @@ class Announcement(models.Model):
     published_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"Announcement by {self.posted_by} - {self.published_at}"
+        return f"Announcement by {self.posted_by.get_full_name()} — {self.published_at}"
 
 
 class Patient(models.Model):

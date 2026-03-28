@@ -110,7 +110,7 @@ Appointment.objects.filter(appointment_date__gte=timezone.now().date()).order_by
 ```python
 from django.db.models import Case, When, IntegerField
 
-Schedule.objects.annotate(
+Schedule.objects.filter(doctor=doctor).annotate(
     day_order=Case(
         When(day_of_week="monday", then=1),
         When(day_of_week="tuesday", then=2),
@@ -127,7 +127,7 @@ Schedule.objects.annotate(
 **Description:** Return is doctor work a specefic day or not 
 
 ```python
-Schedule.objects.filter(doctor=doctor,day_of_week=day_of_week)
+Schedule.objects.filter(doctor=doctor,day_of_week=day_of_week).exists()
 ```
 ### List all Doctors is available on given day
 **Description:** Return list of all doctors working in specefic day
@@ -201,4 +201,4 @@ Appointment.objects.filter(doctor__service=service).values('patient').distinct()
 ### Get all vaccination records for a service 
 **Description:** Retrieve all vaccination record where the administering doctor belong to a specefic service ordered by date 
 ```python
-VaccinationRecord.objects.filter(administered_by__service=service).order_by('-date_administered ')
+VaccinationRecord.objects.filter(administered_by__service=service).order_by('-date_administered')

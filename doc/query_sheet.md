@@ -73,7 +73,7 @@ Document.objects.filter(file__patient=patient,document_type=document_type)
 Document.objects.filter(uploaded_by=doctor).order_by('-uploaded_at')
 ```
 ### Count Documents per type fot a patient 
-**Description:** Return a summary count of documents grouped by type for a givenpatient
+**Description:** Return a summary count of documents grouped by type for a given patient
 ```python
 from django.db.models import Count
 
@@ -87,7 +87,7 @@ Document.objects.filter(file__patient=patient).values('document_type').annotate(
 Appointment.objects.filter(patient=patient).order_by('-appointment_date')
 ```
 ### List today's appointments for a doctor
-**Description:** Retrieve all appointments scheduled for today for a dpecefic doctor,ordered by time
+**Description:** Retrieve all appointments scheduled for today for a specefic doctor,ordered by time
 ```python
 from django.utils import timezone
 today = timezone.now().date()
@@ -104,6 +104,18 @@ Appointment.objects.filter(patient=patient,appointment_status=appointment_status
 from django.utils import timezone
 Appointment.objects.filter(appointment_date__gte=timezone.now().date()).order_by('appointment_date')
 ```
+### Count appointments per doctor this week
+**Description:** Return number of appointments for each doctors this week ordered by total,more precisely we will have a date then we will figure which day of the week it is then print the whole week,example(xxxx-xx-xx) date matches tuesday,and the week start from monday till sunday,so will print that whole week including tesday ( knowing the day is important bc it help us know the range of the search)
+```python
+today=date.today() # here we are using the present date, we can change it by the date we wanna search for 
+monday = today - timedelta(days=today.weekday())
+sunday = monday + timedelta(days=6)
+
+Appointment.objects.filter(
+    appointment_date__range=(monday,sunday)).values('doctor').annotate(total=Count('id')).order_by('-total')
+
+```
+
 # Schedule
 ### Get a doctor's weekly schedule
 **Description:**Retrieve all schedule slots for a specefic doctor for current week ordered by day (from monday to sunday)

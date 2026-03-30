@@ -4,7 +4,7 @@
 **Stack:** Django + PostgreSQL
 **Last updated:** March 2026
 
-#Patients
+# Patients
 ### Get all patients
 **Description:** Retrive all patients in the system (admin use)`
 
@@ -19,7 +19,7 @@ Patient.objects.all()
 Patient.objects.filter(created_by=doctor)
 ```
 
-###Get guardian's children
+### Get guardian's children
 **Description:** Retrieve all patients belonging to a guardian
 
 ```python
@@ -36,9 +36,9 @@ Patient.objects.filter(
     Q(patient_last_name__icontains=query)
 )
 ```
-#MedicalFile
+# MedicalFile
 
-###Get patient medical file
+### Get patient medical file
 **Description:** Retrieve the single medical file for a given patient
 
 ```python
@@ -55,7 +55,7 @@ MedicalFile.objects.prefetch_related('document_set').get(patient=patient)
 ```python
 MedicalFile.objects.filter(blood_type=blood_type)
 ```
-#Documents`
+# Documents
 
 ### List all Documents for a patient 
 **Description:** Retrieve all document belonging to a specefic patient (ordered by uploaddate-most recent)
@@ -79,6 +79,11 @@ from django.db.models import Count
 
 Document.objects.filter(file__patient=patient).values('document_type').annotate(total=Count('id'))
 ```
+### Exclude hidden documents
+**Description:** Retrieve all documents in a patient's medical file that are not hidden from the guardian
+```python
+Document.objects.filter(file__patient=patient).exclude(is_visible=False)
+```
 
 # Appointments
 ### List all Appointment for a patient
@@ -93,7 +98,7 @@ from django.utils import timezone
 today = timezone.now().date()
 Appointment.objects.filter(doctor=doctor, appointment_date=today).order_by('appointment_date')
 ```
-### Filter appointment by status
+### Filter appointments by status
 **Description**:Retrieve all appointments for a given patient filtered by status
 ```python
 Appointment.objects.filter(patient=patient,appointment_status=appointment_status).order_by('-appointment_date')
@@ -115,6 +120,13 @@ Appointment.objects.filter(
     appointment_date__range=(monday,sunday)).values('doctor').annotate(total=Count('id')).order_by('-total')
 
 ```
+
+### Exclude cancelled appointment
+**Description:** Retrieve all appointments that are not cancelled, ordered by date
+```python
+Appointment.objects.exclude(appointment_status="cancelled").order_by('-appointment_date')
+```
+
 
 # Schedule
 ### Get a doctor's weekly schedule
@@ -153,7 +165,15 @@ Schedule.objects.filter(day_of_week=day_of_week).select_related('doctor').order_
 ```python
 Schedule.objects.filter(doctor__service=service).order_by('day_of_week','start_time')
 ```
-#VaccinationRecord
+### Exclude doctors with no schedule
+**Description:** Retrieve all doctors who have at least one schedule entry defined (means the doctors that doesn't appear in schedule table)
+
+```python
+Doctor.objects.exclude(schedule__isnull=True)
+```
+
+
+# VaccinationRecord
 ### List all Vaccination records for patient 
 **Description:** Retrieve all Vaccination records belonging to a specefic patient ordered by day(most recent first)
 ```python
@@ -178,7 +198,7 @@ today = date.today()
 end_of_week = today + timedelta(days=7)
 VaccinationRecord.objects.filter(next_dose_date__range=(today, end_of_week)).order_by('next_dose_date')
 ```
-#Announcement
+# Announcement
 ### List all active announcements
 **Description:** Retrive all announcements where it's active ordered by most recent 
 ```python
@@ -194,7 +214,7 @@ Announcement.objects.filter(is_active = True).order_by('-published_at')[:5]
 ```python
 Announcement.objects.filter(posted_by=user).order_by('-published_at')
 ```
-#Service
+# Service
 ### List all doctor in a service
 **Description:** Retrieve all doctors belonging to a specefic service
 ```python
